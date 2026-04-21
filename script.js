@@ -27,7 +27,7 @@ form.addEventListener("submit", async (e) => {
 
   // send to backend
   if (valid) {
-    const res = await fetch("http://localhost:5000/signup", {
+    const res = await fetch("https://login-system-api-py77.onrender.com/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
