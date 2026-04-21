@@ -5,71 +5,84 @@ const bcrypt = require("bcryptjs");
 
 const app = express();
 
-app.use(cors());
+// === CORS Configuration (Important for GitHub Pages) ===
+app.use(cors({
+    origin: ['https://marveycrypton.github.io', 'http://localhost:5500', 'http://127.0.0.1:5500'],
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
-mongoose.connect("mongodb+srv://arayinka15_db_user:NjlanibNv02ReTZc@cluster0.v1spvol.mongodb.net/?appName=Cluster0")
-.then(() => console.log("DB connected"))
-.catch(err => console.log(err));
+// MongoDB Connection
+mongoose.connect("mongodb+srv://arayinka15_db_user:NjlanibNv02ReTZc@cluster0.v1spvol.mongodb.net/?retryWrites=true&w=majority")
+    .then(() => console.log("✅ MongoDB connected"))
+    .catch(err => console.log("❌ DB Error:", err));
 
+// User Schema & Model
 const UserSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  password: String
+    name: String,
+    email: String,
+    password: String
 });
 
 const User = mongoose.model("User", UserSchema);
 
+// ====================== ROUTES ======================
+
+// Signup Route
 app.post("/signup", async (req, res) => {
-  console.log("🔥 Signup request received");
-  console.log(req.body);
+    console.log("🔥 Signup request received:", req.body);
 
-  const { name, email, password } = req.body;
+    try {
+        const { name, email, password } = req.body;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
 
-  const user = new User({
-    name,
-    email,
-    password: hashedPassword
-  });
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
+        }
 
-  await user.save();
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-  console.log("✅ User saved:", email);
+        const user = new User({ name, email, password: hashedPassword });
+        await user.save();
 
-  res.json({ message: "User created" });
+        console.log("✅ User created:", email);
+        res.json({ message: "User created successfully" });
+
+    } catch (err) {
+        console.error("Signup error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
 });
 
+// Login Route
 app.post("/login", async (req, res) => {
-  console.log("🔥 Login request received");
-  console.log(req.body);
+    console.log("🔥 Login request received:", req.body);
 
-  const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ message: "User not found" });
 
-  if (!user) return res.json({ message: "User not found" });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ message: "Wrong password" });
 
-  const isMatch = await bcrypt.compare(password, user.password);
+        res.json({ message: "Login successful" });
 
-  if (!isMatch) return res.json({ message: "Wrong password" });
-
-  res.json({ message: "Login successful" });
+    } catch (err) {
+        console.error("Login error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
-
-app.post("/signup", (req, res) => {
-  console.log("🔥 signup hit");
-  res.json({ message: "ok" });
-
-  const PORT = process.env.PORT || 5000;
-
+// Start Server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
-});
-
+    console.log(`🚀 Server running on port ${PORT}`);
 });

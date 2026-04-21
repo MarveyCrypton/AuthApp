@@ -27,7 +27,7 @@ form.addEventListener("submit", async (e) => {
 
   // send to backend
   if (valid) {
-    const res = await fetch("https://login-system-api-py77.onrender.com/", {
+    const res = await fetch("https://login-system-api-py77.onrender.com/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -43,6 +43,5 @@ form.addEventListener("submit", async (e) => {
 
     alert(data.message);
     form.reset();
-    window.location.href = "login.html";
   }
 });
