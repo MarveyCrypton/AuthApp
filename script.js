@@ -1,47 +1,67 @@
 const form = document.getElementById("signupForm");
+const submitBtn = document.getElementById("submitBtn");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  let name = document.getElementById("name");
-  let email = document.getElementById("email");
-  let password = document.getElementById("password");
+  // Clear previous errors
+  document.getElementById("nameError").textContent = "";
+  document.getElementById("emailError").textContent = "";
+  document.getElementById("passwordError").textContent = "";
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   let valid = true;
 
-  // validation
-  if (name.value.trim() === "") {
-    document.getElementById("nameError").textContent = "Name required";
+  // Validation
+  if (name === "") {
+    document.getElementById("nameError").textContent = "Name is required";
     valid = false;
   }
 
-  if (!email.value.includes("@")) {
-    document.getElementById("emailError").textContent = "Invalid email";
+  if (!email.includes("@") || !email.includes(".")) {
+    document.getElementById("emailError").textContent = "Please enter a valid email";
     valid = false;
   }
 
-  if (password.value.length < 6) {
-    document.getElementById("passwordError").textContent = "Min 6 characters";
+  if (password.length < 6) {
+    document.getElementById("passwordError").textContent = "Password must be at least 6 characters";
     valid = false;
   }
 
-  // send to backend
-  if (valid) {
+  if (!valid) return;
+
+  // Disable button and show loading state
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Creating Account...";
+
+  try {
     const res = await fetch("https://login-system-api-py77.onrender.com/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        name: name.value,
-        email: email.value,
-        password: password.value
-      })
+      body: JSON.stringify({ name, email, password })
     });
 
     const data = await res.json();
 
-    alert(data.message);
-    form.reset();
+    if (res.ok) {
+      alert(data.message || "Account created successfully!");
+      form.reset();
+      // Optional: redirect to login after successful signup
+      // window.location.href = "login.html";
+    } else {
+      alert(data.message || "Something went wrong");
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    alert("Network error. Please check your connection and try again.");
+  } finally {
+    // Re-enable button
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Create Account";
   }
 });

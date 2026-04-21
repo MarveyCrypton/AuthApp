@@ -2,26 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Signup Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup - AuthApp</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="container">
-    <h2>Signup</h2>
-
+    <h2>Create Account</h2>
+    
     <form id="signupForm">
-      <input type="text" id="name" placeholder="Full Name" />
-      <small id="nameError"></small>
+      <div class="form-group">
+        <input type="text" id="name" placeholder="Full Name" required />
+        <small id="nameError" class="error"></small>
+      </div>
 
-      <input type="email" id="email" placeholder="Email" />
-      <small id="emailError"></small>
+      <div class="form-group">
+        <input type="email" id="email" placeholder="Email Address" required />
+        <small id="emailError" class="error"></small>
+      </div>
 
-      <input type="password" id="password" placeholder="Password" />
-      <small id="passwordError"></small>
+      <div class="form-group">
+        <input type="password" id="password" placeholder="Password (min 6 characters)" required />
+        <small id="passwordError" class="error"></small>
+      </div>
 
-      <button type="submit">Create Account</button>
+      <button type="submit" id="submitBtn">Create Account</button>
     </form>
+
+    <p class="switch-link">
+      Already have an account? 
+      <a href="login.html">Login here</a>
+    </p>
   </div>
 
   <script src="script.js"></script>
