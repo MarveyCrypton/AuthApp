@@ -43,5 +43,6 @@ form.addEventListener("submit", async (e) => {
 
     alert(data.message);
     form.reset();
+    window.location.href = "login.html";
   }
 });
