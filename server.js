@@ -15,7 +15,7 @@ app.use(cors({
 app.use(express.json());
 
 // MongoDB Connection (updated with retryWrites)
-mongoose.connect("mongodb+srv://arayinka15_db_user:NjlanibNv02ReTZc@cluster0.v1spvol.mongodb.net/AuthApp?retryWrites=true&w=majority")
+mongoose.connect("mongodb+srv://arayinka15_db_user:NjlanibNv02ReTZc@cluster0.v1spvol.mongodb.net/AuthApp?retryWrites=true&w=majority&serverSelectionTimeoutMS=30000")
     .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => {
         console.error("❌ MongoDB Connection Error:", err);
@@ -64,4 +64,20 @@ app.post("/signup", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+});
+
+// Temporary Clear All Users Route (using GET so you can access it easily)
+app.get("/clear-users", async (req, res) => {
+    try {
+        const result = await User.deleteMany({});
+        console.log(`✅ Cleared ${result.deletedCount} users from database`);
+        
+        res.json({ 
+            success: true,
+            message: `Successfully deleted ${result.deletedCount} users. Database is now empty! You can start fresh.` 
+        });
+    } catch (error) {
+        console.error("Clear users error:", error);
+        res.status(500).json({ message: "Failed to clear users" });
+    }
 });

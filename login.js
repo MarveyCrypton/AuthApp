@@ -3,36 +3,44 @@ const form = document.getElementById("loginForm");
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  let email = document.getElementById("email");
-  let password = document.getElementById("password");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
 
   let valid = true;
 
-  // validation
-  if (!email.value.includes("@")) {
-    document.getElementById("emailError").textContent = "Enter valid email";
+  // Clear previous errors
+  document.getElementById("emailError").textContent = "";
+  document.getElementById("passwordError").textContent = "";
+
+  // Validation
+  if (!emailInput.value.trim().includes("@")) {
+    document.getElementById("emailError").textContent = "Enter a valid email";
     valid = false;
-  } else {
-    document.getElementById("emailError").textContent = "";
   }
 
-  if (password.value.length < 6) {
+  if (passwordInput.value.length < 6) {
     document.getElementById("passwordError").textContent = "Min 6 characters";
     valid = false;
-  } else {
-    document.getElementById("passwordError").textContent = "";
   }
 
-  // send to backend
-  if (valid) {
-    const res = await fetch("http://localhost:5000/login", {
+  if (!valid) return;
+
+  // Loading state
+  const submitBtn = document.querySelector("#loginForm button");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Logging in...";
+  }
+
+  try {
+    const res = await fetch("https://login-system-api-py77.onrender.com/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        email: email.value,
-        password: password.value
+        email: emailInput.value.trim(),
+        password: passwordInput.value
       })
     });
 
@@ -40,9 +48,19 @@ form.addEventListener("submit", async (e) => {
 
     alert(data.message);
 
-   if (data.message === "Login successful") {
-  localStorage.setItem("userEmail", email.value);
-  window.location.href = "dashboard.html";
-}
+    if (data.message === "Login successful" || data.message.toLowerCase().includes("successful")) {
+      localStorage.setItem("userEmail", emailInput.value.trim());
+      window.location.href = "dashboard.html";
+    }
+
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Unable to connect to server. Please try again later.");
+  } finally {
+    // Reset button
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Login";
+    }
   }
 });
